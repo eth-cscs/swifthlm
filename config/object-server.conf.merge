@@ -1,0 +1,49 @@
+#
+### High latency media (hlm) configuration on storage node
+[hlm]
+## You can override the default log level here:
+set log_level = INFO
+#set log_level = DEBUG
+## Declare SwiftHLM Connector (and consequently the Backend) to be used:
+#
+# Dummy Connector/Backend - used by default if no other connector is
+# provided/declared
+#swifthlm_connector_module = swifthlm.dummy_connector
+#
+# IBM Spectrum Archive and IBM Spectrum Protect (proprietary) Connector/Backend
+swifthlm_connector_module = swifthlmibmsa.ibmsa_swifthlm_connector
+#
+# LTFS DM (open source) Connector/Backend
+# Note: this connector is installed by default as part of SwiftHLM install, but
+# it is not activated (declared to use) by default. LTFS DM backend needs to be
+# installed separately (https://github.com/ibm-research/LTFS-Data-Management)
+#swifthlm_connector_module = swifthlm.ltfsdm_connector
+#
+# Your own Connector/Backend
+# EITHER define the connector python module name (if installed as a python
+# module), e.g.:
+# swifthlm_connector_module = swifthlmxxx.opt_disc_connector
+# OR specify the connector directory path and filename:
+#swifthlm_connector_dir = /opt/xxx/swifthlmconnector
+#swifthlm_connector_filename = connector.py
+#
+## Connector/Backend specific settings
+#
+## LTFS DM Connector settings
+[ltfsdm]
+# Path to ltfsdm binary. If not set, /usr/local/bin/ltfsdm is used by default.
+ltfsdm_path = /usr/local/bin/ltfsdm
+# Path to the directory to use for temporary files
+connector_tmp_dir = /tmp/swifthlm
+# Tape storage pool to use for storing objects data
+tape_storage_pool = swiftpool
+#
+# IBM Spectrum Archive/Protect Connector settings
+[ibmsasp]
+# IBM Spectrum Archive/Protect Connector configuration
+connector_tmp_dir = /tmp/swifthlm
+# IBM Spectrum Archive/Protect or LTFS DM Backend configuration
+gpfs_filesystem_or_fileset = /mnt/gpfs
+library = library0
+tape_storage_pool = swiftpool@library0
+

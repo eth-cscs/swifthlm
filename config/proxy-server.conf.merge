@@ -1,0 +1,62 @@
+[pipeline:main]
+pipeline =  healthcheck cache formpost tempurl s3token authtoken keystoneauth container-quotas account-quotas staticweb bulk slo dlo hlm proxy-server
+
+[filter:hlm]
+use = egg:swifthlm#swifthlm
+set log_level = DEBUG
+
+# Only objects with size higher then value set here will be migrated/premigrated
+# The value in BYTES is assumed, default is set to 131072
+# Value set here is not applied to (pre)migration policies (object_size is used in that case)
+minimum_object_size_for_migration = 131072
+
+# Filtering object based on size in CONTAINER migrate/premigrate requests
+# If set to True, only objects with size higher than value defined with minimum_object_size_for_migration will be filtered and migrated/premigrated
+# If set to False, all objects from container are migrated/premigrated
+apply_minimum_object_size_in_container_request = False
+
+# RFP-23
+# Here admin can set various grouped rules to limit how many recall requests can be submitted
+# There can be unlimited rows starting with "limit_recall_requests_" as rule groups
+# Name of group has to start with "limit_recall_requests_" and end with an integer. E.g. limit_recall_requests_hpc_users_7= is a valid name.
+# Rules in group have to be separated by whitespace
+# Syntax of rules is: <project id/account>:<container name>:<user name>:<limit>
+# "account:container:user:15" - sets limit for combination of user and container
+# ":container:user:15" - sets limit for container only
+# "::user:1" - sets limit for user only
+# Multiple usernames or container names (that belong to the same project) are allowed separated by "," character, e.g. account3:containerX,containerY:user1,user4:0
+
+limit_recall_requests_named_example_1 = AUTH_f565f9254cd043b7853623b263025715:TestContainer:admin:8 AUTH_f565f9254cd043b7853623b263025715:TestContainer::14
+limit_recall_requests_example_limit_admin_1 = ::admin2:6 ::admin:5
+limit_recall_requests_for_TestContainer_1 = AUTH_f565f9254cd043b7853623b263025715:TestContainer::2
+
+# RFP-19
+# Here can admin set the list of users who are allowed to submit HLM requests
+# to containers they have access to
+# This list is a string of user names separated by white space
+
+allow_hlm_for = admin swift
+
+# RFP-22
+# Here admin can define the total limit of recall requests that can be submitted.
+# Total recall limit is only valid if there is no other rule which sets lower number of recall requests.
+# If there is a RFP-23 rule which sets lower recall limit, then the RFP-23 rule has higher priority and therefore is the one that is valid.
+# Syntax of the rule is following:
+total_recall_limit = 100
+
+# RFP-17
+# Sleep time after processing last migration policy from the list
+migration_policy_sleep_time = 600
+
+# RFP-16
+# When enabled, users who have a role which is in operator_roles list do not need to be whitelisted (allow_hlm_for)
+# to be able to execute HLM operations.
+enable_all_operator_role_users_hlm_operations = False
+
+# When enabled, users who have a role which is in reseller_admin_role do not need to be whitelisted (allow_hlm_for)
+# to be able to execute HLM operations.
+enable_all_ResellerAdmin_users_hlm_operations = False
+
+# When enabled, "recall", "status", "requests" HLM operations are allowed on public (set with ACL) containers
+# for users who are no authenticated (do not have valid token)
+enable_hlm_operations_on_public_containers = False
